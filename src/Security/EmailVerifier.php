@@ -8,6 +8,7 @@ use App\Entity\User;
 use App\Repository\EmailVerificationRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -35,7 +36,7 @@ class EmailVerifier
         return $email;
     }
 
-    public function sendEmailVerification(User $user) : void {
+    public function sendEmailVerification(User $user) : bool {
         $emailVerification = $this->createEmailVerification($user);
         $email = (new TemplatedEmail())
             ->from(new Address(SecurityConfig::MAILER_MAIL, SecurityConfig::MAILER_NAME))
@@ -45,6 +46,7 @@ class EmailVerifier
 
         $url = $this->urlGenerator->generate('app_verify_email', [
             'code' => $emailVerification->getCode(),
+            'user' => $user->getUsername()
         ], UrlGeneratorInterface::ABSOLUTE_URL);
 
         $context = $email->getContext();
@@ -52,7 +54,20 @@ class EmailVerifier
 
         $email->context($context);
 
-        $this->mailer->send($email);
+        try {
+            $this->mailer->send($email);
+            return true;
+        } catch (TransportExceptionInterface $e) {
+            return false;
+        }
+    }
+
+    public function verify(string $code, int $user) : bool {
+        $email = $this->emailVerificationRepository->findOneBy(['code' => $code, 'user' => $user]);
+        if (empty($code) || !$email) {
+            return false;
+        }
+        return true;
     }
 
 }

@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Form\RegistrationFormType;
+use App\Repository\EmailVerificationRepository;
 use App\Repository\UserRepository;
 use App\Security\AppAuthenticator;
 use App\Security\EmailVerifier;
@@ -14,16 +15,17 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 class RegistrationController extends AbstractController
 {
     public function __construct(
         private readonly EmailVerifier $emailVerifier,
+        private readonly EntityManagerInterface $entityManager,
+        private readonly EmailVerificationRepository $emailVerificationRepository
     ){}
 
     #[Route('/register', name: 'app_register')]
-    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, UserAuthenticatorInterface $userAuthenticator, AppAuthenticator $authenticator, EntityManagerInterface $entityManager): Response
+    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, UserAuthenticatorInterface $userAuthenticator, AppAuthenticator $authenticator): Response
     {
         $user = new User();
         $form = $this->createForm(RegistrationFormType::class, $user);
@@ -37,8 +39,8 @@ class RegistrationController extends AbstractController
                 )
             );
 
-            $entityManager->persist($user);
-            $entityManager->flush();
+            $this->entityManager->persist($user);
+            $this->entityManager->flush();
 
             $this->emailVerifier->sendEmailVerification($user);
 
@@ -55,8 +57,27 @@ class RegistrationController extends AbstractController
     }
 
     #[Route('/verify/email', name: 'app_verify_email')]
-    public function verifyUserEmail(Request $request, TranslatorInterface $translator, UserRepository $userRepository): Response
+    public function verifyUserEmail(Request $request, UserRepository $userRepository): Response
     {
+        $code = $request->query->get('code', '');
+        $username = $request->query->get('user');
+
+        $user = $userRepository->findOneBy(['username' => $username]);
+        if (!$user) {
+            return $this->redirectToRoute('app_register');
+        }
+
+        $verify = $this->emailVerifier->verify($code, $user->getId());
+        if (!$verify) {
+            return $this->redirectToRoute('app_index');
+        }
+
+        $user->setIsVerified(true);
+
+        $emailVerification = $this->emailVerificationRepository->findOneBy(['code' => $code]);
+        $this->entityManager->remove($emailVerification);
+        $this->entityManager->flush();
+
         return $this->redirectToRoute('app_register');
     }
 }
