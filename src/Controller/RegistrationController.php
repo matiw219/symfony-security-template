@@ -10,6 +10,7 @@ use App\Security\AppAuthenticator;
 use App\Security\EmailVerifier;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -77,6 +78,39 @@ class RegistrationController extends AbstractController
         $this->entityManager->remove($email);
         $this->entityManager->flush();
 
-        return $this->redirectToRoute('app_register');
+        return $this->redirectToRoute('app_index');
+    }
+
+    #[Route('/resend/email', name: 'app_resend_email')]
+    public function reSendEmail() : JsonResponse {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        if (!$user) {
+            return new JsonResponse(['can' => false]);
+        }
+
+        if ($user->isVerified()) {
+            return new JsonResponse(['can' => false]);
+        }
+
+        if (!$user->getEmailVerification()) {
+            return new JsonResponse(['can' => false]);
+        }
+
+        $current = new \DateTimeImmutable();
+        $interval = $current->diff($user->getEmailVerification()->getSendAt());
+
+        if ($interval->i >= 1 || $interval->h >= 1) {
+            $email = $user->getEmailVerification();
+            $email->setSendAt(new \DateTimeImmutable());
+            $email->setCode($this->emailVerifier->createCode($user));
+            $this->entityManager->flush();
+
+            $this->emailVerifier->send($user);
+
+            return new JsonResponse(['can' => true]);
+        }
+        return new JsonResponse(['can' => false]);
     }
 }

@@ -21,8 +21,12 @@ class EmailVerifier
     ) {
     }
 
+    public function createCode(User $user) : string {
+        return hash('sha256', $user->getId() . ';' . $user->getEmail() . ';' . $user->getPassword() . ';' . time());
+    }
+
     public function createEmailVerification(User $user) : EmailVerification {
-        $code = hash('sha256', $user->getId() . ';' . $user->getEmail() . ';' . $user->getPassword() . ';' . time());
+        $code = $this->createCode($user);
         $email = (new EmailVerification())
             ->setUser($user)
             ->setCode($code)
@@ -35,7 +39,11 @@ class EmailVerifier
     }
 
     public function sendEmailVerification(User $user) : bool {
-        $emailVerification = $this->createEmailVerification($user);
+        $this->createEmailVerification($user);
+        return $this->send($user);
+    }
+
+    public function send(User $user) : bool {
         $email = (new TemplatedEmail())
             ->from(new Address(SecurityConfig::MAILER_MAIL, SecurityConfig::MAILER_NAME))
             ->to($user->getEmail())
@@ -43,7 +51,7 @@ class EmailVerifier
             ->htmlTemplate('registration/confirmation_email.html.twig');
 
         $url = $this->urlGenerator->generate('app_verify_email', [
-            'code' => $emailVerification->getCode(),
+            'code' => $user->getEmailVerification()->getCode(),
             'user' => $user->getUsername()
         ], UrlGeneratorInterface::ABSOLUTE_URL);
 
