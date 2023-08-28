@@ -36,6 +36,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'boolean')]
     private $isVerified = false;
 
+    #[ORM\OneToOne(mappedBy: 'user', targetEntity: EmailVerification::class)]
+    private ?EmailVerification $emailVerification = null;
+
+
+    public function getEmailVerification(): ?EmailVerification
+    {
+        return $this->emailVerification;
+    }
+
     public function getId(): ?int
     {
         return $this->id;

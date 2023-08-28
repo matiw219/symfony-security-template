@@ -5,7 +5,6 @@ namespace App\Security;
 use App\Configuration\SecurityConfig;
 use App\Entity\EmailVerification;
 use App\Entity\User;
-use App\Repository\EmailVerificationRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
@@ -19,7 +18,6 @@ class EmailVerifier
         private MailerInterface $mailer,
         private EntityManagerInterface $entityManager,
         private UrlGeneratorInterface $urlGenerator,
-        private EmailVerificationRepository $emailVerificationRepository,
     ) {
     }
 
@@ -60,14 +58,6 @@ class EmailVerifier
         } catch (TransportExceptionInterface $e) {
             return false;
         }
-    }
-
-    public function verify(string $code, int $user) : bool {
-        $email = $this->emailVerificationRepository->findOneBy(['code' => $code, 'user' => $user]);
-        if (empty($code) || !$email) {
-            return false;
-        }
-        return true;
     }
 
 }

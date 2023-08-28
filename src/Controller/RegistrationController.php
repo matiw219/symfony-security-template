@@ -21,7 +21,7 @@ class RegistrationController extends AbstractController
     public function __construct(
         private readonly EmailVerifier $emailVerifier,
         private readonly EntityManagerInterface $entityManager,
-        private readonly EmailVerificationRepository $emailVerificationRepository
+        private EmailVerificationRepository $emailVerificationRepository
     ){}
 
     #[Route('/register', name: 'app_register')]
@@ -67,15 +67,14 @@ class RegistrationController extends AbstractController
             return $this->redirectToRoute('app_register');
         }
 
-        $verify = $this->emailVerifier->verify($code, $user->getId());
-        if (!$verify) {
+        $email = $user->getEmailVerification();
+        if (!$email || $email->getCode() != $code) {
             return $this->redirectToRoute('app_index');
         }
 
         $user->setIsVerified(true);
 
-        $emailVerification = $this->emailVerificationRepository->findOneBy(['code' => $code]);
-        $this->entityManager->remove($emailVerification);
+        $this->entityManager->remove($email);
         $this->entityManager->flush();
 
         return $this->redirectToRoute('app_register');
