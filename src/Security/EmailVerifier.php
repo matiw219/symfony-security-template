@@ -39,11 +39,11 @@ class EmailVerifier
     }
 
     public function sendEmailVerification(User $user) : bool {
-        $this->createEmailVerification($user);
-        return $this->send($user);
+        $email = $this->createEmailVerification($user);
+        return $this->send($user, $email);
     }
 
-    public function send(User $user) : bool {
+    public function send(User $user, EmailVerification $emailVerification = null) : bool {
         $email = (new TemplatedEmail())
             ->from(new Address(SecurityConfig::MAILER_MAIL, SecurityConfig::MAILER_NAME))
             ->to($user->getEmail())
@@ -51,7 +51,7 @@ class EmailVerifier
             ->htmlTemplate('registration/confirmation_email.html.twig');
 
         $url = $this->urlGenerator->generate('app_verify_email', [
-            'code' => $user->getEmailVerification()->getCode(),
+            'code' => ($emailVerification ? $emailVerification->getCode() : $user->getEmailVerification()->getCode()),
             'user' => $user->getUsername()
         ], UrlGeneratorInterface::ABSOLUTE_URL);
 

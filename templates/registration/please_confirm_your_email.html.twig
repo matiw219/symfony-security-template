@@ -6,17 +6,32 @@
 
     <h1>Confirm your email</h1>
 
+    <p id="response">
+
+    </p>
+
     <p>
         Email not received? Click <a href="#" id="resend">here</a> to resend the verification link.
     </p>
 
     <script>
 
+        var current = 0;
+        var lastTime = 0;
+
         $(document).ready(function() {
             $('#resend').on("click", function () {
-                resendEmailVerification();
+                current = new Date().getTime();
+                if ((current - lastTime) >= 6000) {
+                    resendEmailVerification();
+                    lastTime = new Date().getTime();
+                }
+                console.log(current - lastTime)
+
             })
         });
+
+        var timesBad = 0;
 
         function resendEmailVerification() {
             var xhr = new XMLHttpRequest();
@@ -26,9 +41,11 @@
                         var response = JSON.parse(xhr.responseText);
 
                         if (response.can) {
-                            console.log("true");
+                            $('#response').text("New verification link has been sent to your email");
+                            timesBad = 0;
                         } else {
-                            console.log("false.");
+                            timesBad++;
+                            $('#response').text("Please wait up to one minute before sending the verification link again" + (timesBad >= 2 ? " #" + timesBad : ""));
                         }
                     } else {
                         console.error("Błąd: " + xhr.status);
