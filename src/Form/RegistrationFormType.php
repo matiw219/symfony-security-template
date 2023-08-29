@@ -2,6 +2,7 @@
 
 namespace App\Form;
 
+use App\Constraint\PasswordConstraint;
 use App\Entity\User;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Form\AbstractType;
@@ -67,6 +68,7 @@ class RegistrationFormType extends AbstractType
                         'minMessage' => 'Your password must be at least {{ limit }} characters long',
                         'maxMessage' => 'Your password is too long'
                     ]),
+                    new PasswordConstraint()
                 ]
             ])
         ;
