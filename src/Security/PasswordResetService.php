@@ -3,7 +3,6 @@
 namespace App\Security;
 
 use App\Configuration\SecurityConfig;
-use App\Entity\EmailVerification;
 use App\Entity\PasswordReset;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
