@@ -39,6 +39,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToOne(mappedBy: 'user', targetEntity: EmailVerification::class)]
     private ?EmailVerification $emailVerification = null;
 
+    #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
+    private ?PasswordReset $passwordReset = null;
+
 
     public function getEmailVerification(): ?EmailVerification
     {
@@ -135,6 +138,28 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setIsVerified(bool $isVerified): static
     {
         $this->isVerified = $isVerified;
+
+        return $this;
+    }
+
+    public function getPasswordReset(): ?PasswordReset
+    {
+        return $this->passwordReset;
+    }
+
+    public function setPasswordReset(?PasswordReset $passwordReset): static
+    {
+        // unset the owning side of the relation if necessary
+        if ($passwordReset === null && $this->passwordReset !== null) {
+            $this->passwordReset->setUser(null);
+        }
+
+        // set the owning side of the relation if necessary
+        if ($passwordReset !== null && $passwordReset->getUser() !== $this) {
+            $passwordReset->setUser($this);
+        }
+
+        $this->passwordReset = $passwordReset;
 
         return $this;
     }
