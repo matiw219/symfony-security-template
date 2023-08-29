@@ -49,7 +49,7 @@ class PasswordResetService
             ->from(new Address(SecurityConfig::MAILER_MAIL, SecurityConfig::MAILER_NAME))
             ->to($user->getEmail())
             ->subject(SecurityConfig::MAILER_SUBJECT_RESET)
-            ->htmlTemplate('registration/password_reset_template.html.twig');
+            ->htmlTemplate('password/reset/password_reset_template.html.twig');
 
         $url = $this->urlGenerator->generate('app_password_reset_response', [
             'code' => ($passwordReset ? $passwordReset->getCode() : $user->getPasswordReset()->getCode()),

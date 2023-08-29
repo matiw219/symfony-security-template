@@ -1,8 +1,45 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Register{% endblock %}
+{% block title %}Sign Up{% endblock %}
 
 {% block body %}
 
+    <div class="container">
+        <div class="row">
+            <div class="col-11 col-md-10 col-lg-8 col-xl-6 border-1 rounded-3 ms-auto me-auto bg-dark mt-5 text-white" style="opacity: 0.9;">
+                <div class="text-center mb-3 pt-2">
+                    <h1>Sign Up</h1>
+                    <hr>
+                </div>
+                <div class="mb-3">
+                    {{ form_errors(registrationForm) }}
+                    {{ form_start(registrationForm, { 'attr' : { 'class': 'form-group ms-3 me-3' } }) }}
+                        <div class="mb-3">
+                            {{ form_row(registrationForm.email) }}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form_row(registrationForm.username) }}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form_row(registrationForm.plainPassword) }}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form_row(registrationForm.agreeTerms) }}
+                        </div>
+
+                        <button class="btn btn-primary" type="submit">
+                            Sign up
+                        </button>
+                    {{ form_end(registrationForm) }}
+                </div>
+                <div class="mb-3 text-center">
+                    <span>Have already an account? <a href="{{ path('app_login') }}">Login Here!</a></span>
+                </div>
+            </div>
+        </div>
+    </div>
 
 {% endblock %}

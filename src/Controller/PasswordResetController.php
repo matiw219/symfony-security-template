@@ -44,7 +44,7 @@ class PasswordResetController extends AbstractController
                     $interval = $current->diff($user->getPasswordReset()->getSendAt());
                     if ($interval->i < 1 && $interval->h < 1) {
                         $this->addFlash('error', 'Email has been sent, if it didnt arrive wait a minute and resend it');
-                        return $this->render('registration/password_reset_request.html.twig', [
+                        return $this->render('password/reset/password_reset_request.html.twig', [
                             'passwordResetForm' => $passwordResetForm->createView()
                         ]);
                     }
@@ -64,7 +64,7 @@ class PasswordResetController extends AbstractController
             }
         }
 
-        return $this->render('registration/password_reset_request.html.twig', [
+        return $this->render('password/reset/password_reset_request.html.twig', [
             'passwordResetForm' => $passwordResetForm->createView()
         ]);
     }
@@ -106,7 +106,7 @@ class PasswordResetController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
-        return $this->render('registration/password_reset_response.html.twig', [
+        return $this->render('password/reset/password_reset_response.html.twig', [
             'resetPasswordForm' => $resetPasswordForm->createView()
         ]);
     }
