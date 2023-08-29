@@ -3,19 +3,22 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Form\PasswordResetFormType;
 use App\Form\PasswordResetRequestFormType;
 use App\Repository\UserRepository;
 use App\Security\PasswordResetService;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 class PasswordResetController extends AbstractController
 {
     #[Route('/password-reset', name: 'app_password_reset_request')]
-    public function passwordRequest(Request $request, UserRepository $userRepository, PasswordResetService $passwordResetService): Response
+    public function passwordRequest(Request $request, UserRepository $userRepository, PasswordResetService $passwordResetService, EntityManagerInterface $entityManager): Response
     {
         /** @var User $user */
         $user = $this->getUser();
@@ -45,9 +48,19 @@ class PasswordResetController extends AbstractController
                             'passwordResetForm' => $passwordResetForm->createView()
                         ]);
                     }
+                    else {
+                        $user->getPasswordReset()->setCode($passwordResetService->createCode($user));
+                        $user->getPasswordReset()->setSendAt(new \DateTimeImmutable());
+
+                        $entityManager->flush();
+                    }
+                    $passwordResetService->send($user);
+                }
+                else {
+                    $passwordResetService->sendEmailReset($user);
                 }
                 $this->addFlash('success', 'An email with a link has been sent');
-                $passwordResetService->sendEmailReset($user);
+
             }
         }
 
@@ -57,7 +70,7 @@ class PasswordResetController extends AbstractController
     }
 
     #[Route('/password-reset-response', name: 'app_password_reset_response')]
-    public function passwordResponse(Request $request, UserRepository $userRepository): Response
+    public function passwordResponse(Request $request, UserRepository $userRepository, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $entityManager): Response
     {
         /** @var User $user */
         $user = $this->getUser();
@@ -65,7 +78,36 @@ class PasswordResetController extends AbstractController
             return $this->redirectToRoute('app_index');
         }
 
+        $code = $request->get('code', '');
+        $username = $request->get('user');
+
+        $user = $userRepository->findOneBy(['username' => $username]);
+        if (!$user) {
+            return $this->redirectToRoute('app_register');
+        }
+
+        $passwordReset = $user->getPasswordReset();
+
+        if (!$passwordReset || $passwordReset->getCode() != $code) {
+            return $this->redirectToRoute('app_index');
+        }
+
+        $resetPasswordForm = $this->createForm(PasswordResetFormType::class);
+        $resetPasswordForm->handleRequest($request);
+
+        if ($resetPasswordForm->isSubmitted() && $resetPasswordForm->isValid()) {
+            $password = $resetPasswordForm->get('newPassword')->getData();
+
+            $user->setPassword($userPasswordHasher->hashPassword($user, $password));
+            $entityManager->remove($user->getPasswordReset());
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Password has been changed');
+            return $this->redirectToRoute('app_login');
+        }
+
         return $this->render('registration/password_reset_response.html.twig', [
+            'resetPasswordForm' => $resetPasswordForm->createView()
         ]);
     }
 }

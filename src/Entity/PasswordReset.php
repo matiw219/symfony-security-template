@@ -13,7 +13,7 @@ class PasswordReset
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\OneToOne(inversedBy: 'passwordReset', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(inversedBy: 'passwordReset')]
     private ?User $user = null;
 
     #[ORM\Column(length: 255)]
