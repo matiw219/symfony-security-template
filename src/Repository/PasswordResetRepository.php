@@ -22,7 +22,7 @@ class PasswordResetRepository extends ServiceEntityRepository
     }
 
 //    /**
-//     * @return PasswordReset[] Returns an array of PasswordReset objects
+//     * @return PasswordResetService[] Returns an array of PasswordResetService objects
 //     */
 //    public function findByExampleField($value): array
 //    {
@@ -36,7 +36,7 @@ class PasswordResetRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?PasswordReset
+//    public function findOneBySomeField($value): ?PasswordResetService
 //    {
 //        return $this->createQueryBuilder('p')
 //            ->andWhere('p.exampleField = :val')
