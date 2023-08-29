@@ -23,6 +23,7 @@ class PasswordResetController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
         if ($user) {
+            $this->addFlash('error', 'You are logged in, you cannot reset your password');
             return $this->redirectToRoute('app_index');
         }
 
@@ -60,7 +61,6 @@ class PasswordResetController extends AbstractController
                     $passwordResetService->sendEmailReset($user);
                 }
                 $this->addFlash('success', 'An email with a link has been sent');
-
             }
         }
 
@@ -75,6 +75,7 @@ class PasswordResetController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
         if ($user) {
+            $this->addFlash('error', 'You are logged in, you cannot reset your password');
             return $this->redirectToRoute('app_index');
         }
 
@@ -83,12 +84,14 @@ class PasswordResetController extends AbstractController
 
         $user = $userRepository->findOneBy(['username' => $username]);
         if (!$user) {
+            $this->addFlash('error', 'An unexpected error occurred #1 PasswordReset');
             return $this->redirectToRoute('app_register');
         }
 
         $passwordReset = $user->getPasswordReset();
 
         if (!$passwordReset || $passwordReset->getCode() != $code) {
+            $this->addFlash('error', 'An unexpected error occurred #2 PasswordReset');
             return $this->redirectToRoute('app_index');
         }
 

@@ -29,6 +29,7 @@ class RegistrationController extends AbstractController
     public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, UserAuthenticatorInterface $userAuthenticator, AppAuthenticator $authenticator): Response
     {
         if ($this->getUser()) {
+            $this->addFlash('error', 'You are logged in');
             return $this->redirectToRoute('app_index');
         }
         $user = new User();
@@ -68,11 +69,13 @@ class RegistrationController extends AbstractController
 
         $user = $userRepository->findOneBy(['username' => $username]);
         if (!$user) {
+            $this->addFlash('error', 'You are not logged in');
             return $this->redirectToRoute('app_register');
         }
 
         $email = $user->getEmailVerification();
         if (!$email || $email->getCode() != $code) {
+            $this->addFlash('error', 'An unexpected error occurred VerifyEmail');
             return $this->redirectToRoute('app_index');
         }
 
