@@ -1,0 +1,58 @@
+<div class="alerts col-6 col-sm-5 col-md-4 col-lg-3 col-xl-2">
+
+    {% for flash in app.flashes('success') %}
+        <div class="alert alert-white alert-dismissible fade show border-1 border-light rounded-1" role="alert">
+            <div class="d-flex bd-highligh">
+                <h5 class="text-success flex-grow-1 bd-highlight">Success!</h5>
+                <button type="button" class="alert-close bd-highlight btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <div>
+                <small>
+                    {{ flash }}
+                </small>
+            </div>
+        </div>
+    {% endfor %}
+    {% for flash in app.flashes('error') %}
+        <div class="alert alert-white alert-dismissible fade show border-1 border-light rounded-1" role="alert">
+            <div class="d-flex bd-highligh">
+                <h5 class="text-danger flex-grow-1 bd-highlight">Error!</h5>
+                <button type="button" class="alert-close bd-highlight btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <div>
+                <small>
+                    {{ flash }}
+                </small>
+            </div>
+        </div>
+    {% endfor %}
+
+    {% for flash in app.flashes('warning') %}
+        <div class="alert alert-white alert-dismissible fade show border-1 border-light rounded-1" role="alert">
+            <div class="d-flex bd-highligh">
+                <h5 class="text-warning flex-grow-1 bd-highlight">Warning!</h5>
+                <button type="button" class="alert-close bd-highlight btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <div>
+                <small>
+                    {{ flash }}
+                </small>
+            </div>
+        </div>
+    {% endfor %}
+
+    {% for flash in app.flashes('info') %}
+        <div class="alert alert-white alert-dismissible fade show border-1 border-light rounded-1" role="alert">
+            <div class="d-flex bd-highligh">
+                <h5 class="text-info flex-grow-1 bd-highlight">Info!</h5>
+                <button type="button" class="alert-close bd-highlight btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <div>
+                <small>
+                    {{ flash }}
+                </small>
+            </div>
+        </div>
+    {% endfor %}
+
+</div>

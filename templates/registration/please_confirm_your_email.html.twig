@@ -1,18 +1,25 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Verify your email{% endblock %}
+{% block title %}Confirm your email{% endblock %}
 
 {% block body %}
 
-    <h1>Confirm your email</h1>
-
-    <p id="response">
-
-    </p>
-
-    <p>
-        Email not received? Click <a href="#" id="resend">here</a> to resend the verification link.
-    </p>
+    <div class="container">
+        <div class="row">
+            <div class="col-11 col-md-10 col-lg-8 col-xl-6 border-1 rounded-3 ms-auto me-auto bg-dark mt-5 text-white" style="opacity: 0.9;">
+                <div class="text-center mb-3 pt-2">
+                    <h1>Confirm your email</h1>
+                    <hr>
+                </div>
+                <div class="mb-3 text-center">
+                    Email not received? Click <a href="#" id="resend">here</a> to resend the verification link.
+                </div>
+                <div class="mb-3">
+                    <p id="response"></p>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
 
