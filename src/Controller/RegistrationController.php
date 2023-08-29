@@ -4,7 +4,6 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Form\RegistrationFormType;
-use App\Repository\EmailVerificationRepository;
 use App\Repository\UserRepository;
 use App\Security\AppAuthenticator;
 use App\Security\EmailVerifier;
@@ -22,7 +21,6 @@ class RegistrationController extends AbstractController
     public function __construct(
         private readonly EmailVerifier $emailVerifier,
         private readonly EntityManagerInterface $entityManager,
-        private EmailVerificationRepository $emailVerificationRepository
     ){}
 
     #[Route('/register', name: 'app_register')]

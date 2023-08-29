@@ -17,8 +17,16 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class PasswordResetController extends AbstractController
 {
+
+    public function __construct(
+        private UserRepository $userRepository,
+        private UserPasswordHasherInterface $userPasswordHasher,
+        private EntityManagerInterface $entityManager
+    ){}
+
+
     #[Route('/password-reset', name: 'app_password_reset_request')]
-    public function passwordRequest(Request $request, UserRepository $userRepository, PasswordResetService $passwordResetService, EntityManagerInterface $entityManager): Response
+    public function passwordRequest(Request $request, PasswordResetService $passwordResetService): Response
     {
         /** @var User $user */
         $user = $this->getUser();
@@ -32,7 +40,7 @@ class PasswordResetController extends AbstractController
 
         if ($passwordResetForm->isSubmitted() && $passwordResetForm->isValid()) {
             $email = $passwordResetForm->get('email')->getData();
-            $user = $userRepository->findOneBy(['email' => $email]);
+            $user = $this->userRepository->findOneBy(['email' => $email]);
 
             if (!$user) {
                 $passwordResetForm->get('email')->addError(
@@ -53,7 +61,7 @@ class PasswordResetController extends AbstractController
                         $user->getPasswordReset()->setCode($passwordResetService->createCode($user));
                         $user->getPasswordReset()->setSendAt(new \DateTimeImmutable());
 
-                        $entityManager->flush();
+                        $this->entityManager->flush();
                     }
                     $passwordResetService->send($user);
                 }
@@ -70,7 +78,7 @@ class PasswordResetController extends AbstractController
     }
 
     #[Route('/password-reset-response', name: 'app_password_reset_response')]
-    public function passwordResponse(Request $request, UserRepository $userRepository, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $entityManager): Response
+    public function passwordResponse(Request $request): Response
     {
         /** @var User $user */
         $user = $this->getUser();
@@ -82,7 +90,7 @@ class PasswordResetController extends AbstractController
         $code = $request->get('code', '');
         $username = $request->get('user');
 
-        $user = $userRepository->findOneBy(['username' => $username]);
+        $user = $this->userRepository->findOneBy(['username' => $username]);
         if (!$user) {
             $this->addFlash('error', 'An unexpected error occurred #1 PasswordReset');
             return $this->redirectToRoute('app_register');
@@ -101,9 +109,9 @@ class PasswordResetController extends AbstractController
         if ($resetPasswordForm->isSubmitted() && $resetPasswordForm->isValid()) {
             $password = $resetPasswordForm->get('newPassword')->getData();
 
-            $user->setPassword($userPasswordHasher->hashPassword($user, $password));
-            $entityManager->remove($user->getPasswordReset());
-            $entityManager->flush();
+            $user->setPassword($this->userPasswordHasher->hashPassword($user, $password));
+            $this->entityManager->remove($user->getPasswordReset());
+            $this->entityManager->flush();
 
             $this->addFlash('success', 'Password has been changed');
             return $this->redirectToRoute('app_login');

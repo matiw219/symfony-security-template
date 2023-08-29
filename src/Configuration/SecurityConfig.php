@@ -5,8 +5,9 @@ namespace App\Configuration;
 class SecurityConfig
 {
 
-    const MAILER_MAIL = 'wielechowskimateusz072@gmail.com';
+    const MAILER_MAIL = '';
     const MAILER_NAME = 'SecurityTest';
-    const MAILER_SUBJECT = 'Weryfikacja konto SecurityTest';
+    const MAILER_SUBJECT = 'Verify Account SecurityTest';
+    const MAILER_SUBJECT_RESET = 'Reset Password SecurityTest';
 
 }
