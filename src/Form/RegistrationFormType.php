@@ -8,11 +8,13 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\IsTrue;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Regex;
 
 class RegistrationFormType extends AbstractType
 {
@@ -20,12 +22,30 @@ class RegistrationFormType extends AbstractType
     {
         $builder
             ->add('email')
-            ->add('username')
+            ->add('username', TextType::class, [
+                'constraints' => [
+                    new Regex([
+                        'pattern' => '/^[^0-9].*$/',
+                        'message' => 'Username cannot start with a number'
+                    ]),
+                    new Regex([
+                        'pattern' => '/^[a-zA-z0-9_]+$/',
+                        'message' => 'Username can only consist of letters, numbers and the underscore'
+                    ]),
+                    new Length([
+                        'min' => 6,
+                        'max' => 32,
+                        'minMessage' => 'Your username must be at least {{ limit }} characters long',
+                        'maxMessage' => 'Your username is too long'
+                    ]),
+                ]
+            ])
             ->add('agreeTerms', CheckboxType::class, [
+                'label' => 'Akceptuje regulamin',
                 'mapped' => false,
                 'constraints' => [
                     new IsTrue([
-                        'message' => 'You should agree to our terms.',
+                        'message' => 'You should agree to our rules.',
                     ]),
                 ],
             ])
