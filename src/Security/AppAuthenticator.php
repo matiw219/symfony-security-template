@@ -30,6 +30,13 @@ class AppAuthenticator extends AbstractLoginFormAuthenticator
         'app_password_reset_response',
     ];
 
+    public const ALLOW_ROUTES_FOR_NOT_VERIFIED = [
+        'app_login',
+        'app_register',
+        'app_verify_email',
+        'app_resend_email',
+    ];
+
     private UserRepository $userRepository;
 
     public function __construct(private UrlGeneratorInterface $urlGenerator, UserRepository $userRepository)

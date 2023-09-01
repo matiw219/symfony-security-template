@@ -22,9 +22,9 @@ class ControllerListener implements EventSubscriberInterface
 
     public static function getSubscribedEvents()
     {
-       return [
-           KernelEvents::CONTROLLER => 'onControllerEvent'
-       ];
+        return [
+            KernelEvents::CONTROLLER => 'onControllerEvent'
+        ];
     }
 
     public function onControllerEvent(ControllerEvent $event): void
@@ -48,9 +48,11 @@ class ControllerListener implements EventSubscriberInterface
         $redirect = false;
 
         if ($user && !$user->isVerified()) {
-           $redirect = true;
+            if (!in_array($route, AppAuthenticator::ALLOW_ROUTES_FOR_NOT_VERIFIED)) {
+                $redirect = true;
+            }
         }
-        else if (!in_array($route, AppAuthenticator::ALLOW_ROUTES_FOR_NOT_LOGGED_IN)) {
+        else if (!$user && !in_array($route, AppAuthenticator::ALLOW_ROUTES_FOR_NOT_LOGGED_IN)) {
             $redirect = true;
         }
 
